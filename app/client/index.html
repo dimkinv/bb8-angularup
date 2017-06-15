@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <button id="go">GO</button>
+    <h2 id="title"></h2>
+    <div><span>Tilt Left/Right [gamma]: </span> <span id="doTiltLR"></span> </div>
+    <div> <span>Tilt Front/Back [beta]: </span> <span id="doTiltFB"></span></div>
+    <div> <span>Direction [alpha]: </span> <span id="doDirection"></span></div>
+
+    <div> <span>Translated angle[deg.]: </span> <span id="transAngle"></span></div>
+
+    <div class="container" style="perspective: 300;">
+        <img src="bb8.png" width="80%" height="80%" id="imgLogo" class="logo" on-ho>
+    </div>
+    <script src="/node_modules/socket.io-client/dist/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
