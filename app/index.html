@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+    <script>
+        let valid_keys = ['a', 'd', 's', 'w'];
+        let isDown = false;
+        let currentRepeatedTimeout;
+        const directions = {
+            a: 'LEFT',
+            d: 'RIGHT',
+            w: 'FORWARD',
+            s: 'BACKWARDS'
+        };
+
+        document.addEventListener('keydown', ($event) => {
+            if (!valid_keys.includes($event.key)) {
+                return;
+            }
+            if (isDown) {
+                return;
+            }
+
+            startRepeatedMovement($event.key)
+            console.log($event);
+            isDown = true;
+        });
+
+        document.addEventListener('keyup', ($event) => {
+            if (!valid_keys.includes($event.key)) {
+                return;
+            }
+
+            clearTimeout(currentRepeatedTimeout);
+            console.log($event);
+            isDown = false;
+        });
+
+        function startRepeatedMovement(direction) {
+            currentRepeatedTimeout = setTimeout(() => {
+                $.get(`/move?direction=${directions[direction]}`, () => {
+                    console.log('done');
+                });
+                startRepeatedMovement(direction);
+            }, 1000)
+        }
+    </script>
+</body>
+
+</html>
