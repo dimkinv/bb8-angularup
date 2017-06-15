@@ -1,7 +1,18 @@
 import * as Cylon from 'cylon';
+import * as http from 'http';
 import * as express from 'express';
+import * as io from 'socket.io';
 
 const app = express()
+const server = http.createServer(app);
+const socket = io(server);
+
+let queue = [{}];
+
+server.listen(3000, function () {
+    console.log('Example app listening on port 3000!')
+});
+
 const DIRECTIONS = {
     FORWARD: 0,
     RIGHT: 90,
@@ -18,32 +29,22 @@ function initExpress() {
     app.get('/', function (req, res) {
         res.sendFile(__dirname + '/index.html');
     });
-
-    app.get('/move', (req, res) => {
-        res.send('ok');
-        let directionAngle = DIRECTIONS[req.query.direction];
-        console.log(`angle: ${directionAngle}`);
-        move(directionAngle);
-
-        // if (directionAngle !== 0 && !directionAngle) {
-        //     return;
-        // }
-
-        // after(200, () => {
-        //     
-        // });
-
-        // after(2000, () => {
-        //     bot.bb8.stop();
-        // });
-    });
 }
 
+socket.on('connection', (client) => {
+    console.log(`connected to ${client.id}`);
+    client.emit('play');
+    client.on('move', (payload: { direction: number }) => {
+        console.log(`angle: ${payload.direction}`);
+        // move(payload.direction);
+    });
+});
 
 let currentTimeout = null;
-function move(directionAngle) {
+function move(directionAngle: number) {
     if (currentTimeout) {
         clearTimeout(currentTimeout);
+        bot.bb8.roll(60, directionAngle);
         setStopTimeout();
         return;
     }
@@ -57,17 +58,8 @@ function setStopTimeout() {
         console.log('stopped');
         bot.bb8.stop();
         currentTimeout = null;
-    }, 1100);
+    }, 600);
 }
-
-app.get('/stop', () => {
-    bot.bb8.stop();
-    console.log('stopped');
-});
-
-app.listen(3000, function () {
-    console.log('Example app listening on port 3000!')
-});
 
 function connectTobb8() {
     Cylon.robot({
@@ -78,7 +70,6 @@ function connectTobb8() {
                 module: "cylon-ble"
             }
         },
-
         devices: {
             bb8: { driver: "bb8", module: "cylon-sphero-ble" }
         },
@@ -86,14 +77,6 @@ function connectTobb8() {
         work: function (_bot) {
             bot = _bot;
             bot.bb8.color(0x00FFFF);
-            // bot.bb8.color(0x00FFFF);
-            // after(500, function () {
-            //     bot.bb8.roll(60, 0);
-            // });
-
-            // after(3000, function () {
-            //     bot.bb8.stop();
-            // });
         }
     }).start();
 }

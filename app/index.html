@@ -9,17 +9,19 @@
 </head>
 
 <body>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
         crossorigin="anonymous"></script>
     <script>
+        const socket = io();
         let valid_keys = ['a', 'd', 's', 'w'];
         let isDown = false;
         let currentRepeatedTimeout;
         const directions = {
-            a: 'LEFT',
-            d: 'RIGHT',
-            w: 'FORWARD',
-            s: 'BACKWARDS'
+            a: 180,
+            d: 0,
+            w: 90,
+            s: 270
         };
 
         document.addEventListener('keydown', ($event) => {
@@ -47,11 +49,12 @@
 
         function startRepeatedMovement(direction) {
             currentRepeatedTimeout = setTimeout(() => {
-                $.get(`/move?direction=${directions[direction]}`, () => {
-                    console.log('done');
-                });
+                socket.emit('move', { direction: directions[direction] })
+                // $.get(`/move?direction=${directions[direction]}`, () => {
+                //     console.log('done');
+                // });
                 startRepeatedMovement(direction);
-            }, 1000)
+            }, 300)
         }
     </script>
 </body>
