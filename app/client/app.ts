@@ -56,9 +56,9 @@ function disconenct() {
 }
 
 function visualHandler(tiltLR, tiltFB, dir) {
-    document.getElementById("doTiltLR").innerHTML = Math.round(tiltLR);
-    document.getElementById("doTiltFB").innerHTML = Math.round(tiltFB);
-    document.getElementById("doDirection").innerHTML = Math.round(dir);
+    document.getElementById("doTiltLR").innerHTML = Math.round(tiltLR).toString();
+    document.getElementById("doTiltFB").innerHTML = Math.round(tiltFB).toString();
+    document.getElementById("doDirection").innerHTML = Math.round(dir).toString();
     // Apply the transform to the image
     var logo = document.getElementById("imgLogo");
     logo.style.webkitTransform =

@@ -21,14 +21,13 @@ const DIRECTIONS = {
 }
 let bot;
 
-connectTobb8();
+// connectTobb8();
 initExpress();
 
 
 function initExpress() {
-    app.get('/', function (req, res) {
-        res.sendFile(__dirname + '/index.html');
-    });
+    app.use(express.static(__dirname + '/client'));
+    
 }
 
 socket.on('connection', (client) => {
