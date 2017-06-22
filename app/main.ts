@@ -2,44 +2,74 @@ import * as Cylon from 'cylon';
 import * as http from 'http';
 import * as express from 'express';
 import * as io from 'socket.io';
+import * as mqtt from 'mqtt';
 
 const app = express()
 const server = http.createServer(app);
-const socket = io(server);
 
 let queue = [{}];
-
-server.listen(3000, function () {
-    console.log('Example app listening on port 3000!')
-});
+let currentTimeout = null;
+let bot;
 
 const DIRECTIONS = {
     FORWARD: 0,
     RIGHT: 90,
     BACKWARDS: 180,
     LEFT: 270
+};
+
+let colors = {
+    red: "#FF0000",
+    blue: "#0000D9",
+    lime: "#00FF00",
+    yellow: "#FFFF00",
+    white: "#FFFFFF",
+    purple: "#FF00FF",
+    cyan: "#03ECEC",
+    green: "#016601"
+};
+
+let client  = mqtt.connect('mqtt://test.mosquitto.org:1883');
+ 
+client.on('connect', function (data) {
+    client.subscribe('flow-bb8-output');
+})
+ 
+client.on('message', function (topic, message) {
+    message = JSON.parse(message);
+
+    switch(message.command) {
+        case 'roll':
+            bot.bb8.roll(60, message.value);
+        break;
+        case 'stop':
+            bot.bb8.stop();
+            clearInterval(currentTimeout);
+        break;
+        case 'color':
+            bot.bb8.color(colors[message.value]);
+        break;
+        case 'disco':
+            disco();
+        break;
+        case 'desk-buddy':
+            moveHead();
+        break;
+    }
+})
+
+function disco(){
+    currentTimeout = setInterval(() => {
+        bot.bb8.randomColor();
+    }, 200);
 }
-let bot;
 
-// connectTobb8();
-initExpress();
-
-
-function initExpress() {
-    app.use(express.static(__dirname + '/client'));
-    
+function moveHead(){
+    currentTimeout = setInterval(() => {
+        bot.bb8.roll(0, Math.floor(Math.random() * 180));
+    }, 3000);
 }
 
-socket.on('connection', (client) => {
-    console.log(`connected to ${client.id}`);
-    client.emit('play');
-    client.on('move', (payload: { direction: number }) => {
-        console.log(`angle: ${payload.direction}`);
-        // move(payload.direction);
-    });
-});
-
-let currentTimeout = null;
 function move(directionAngle: number) {
     if (currentTimeout) {
         clearTimeout(currentTimeout);
@@ -54,7 +84,7 @@ function move(directionAngle: number) {
 
 function setStopTimeout() {
     currentTimeout = setTimeout(() => {
-        console.log('stopped');
+        console.log('stoppped');
         bot.bb8.stop();
         currentTimeout = null;
     }, 600);
@@ -65,7 +95,7 @@ function connectTobb8() {
         connections: {
             bluetooth: {
                 adaptor: "central",
-                uuid: '1f7285a436eb4bfaa488a08eccc66ab0',
+                uuid: 'd544f74c30f6',
                 module: "cylon-ble"
             }
         },
@@ -79,3 +109,10 @@ function connectTobb8() {
         }
     }).start();
 }
+
+
+connectTobb8();
+
+server.listen(3000, function () {
+    console.log('Example app listening on port 3000!')
+});
